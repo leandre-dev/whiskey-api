@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.transaction.UserTransaction;
 
 import fr.projet.jee.Objets.Token;
@@ -23,10 +22,7 @@ public class TokenDao {
 
     public List<Token> read(Long user_id) {
         try {
-            Query query = em.createQuery("SELECT t FROM Token t WHERE t.user_id = :id and t.endValidity is null");
-            query.setParameter("id", user_id);
-            Logger.getGlobal().log(Level.SEVERE, "JPA Found " + query.getResultList().size() + " valid tokens");
-            return query.getResultList();
+            return em.createQuery("SELECT t FROM Token t WHERE t.user_id = :id and t.endValidity is null", Token.class).setParameter("id", user_id).getResultList();
         }catch (Exception e){
             return null;
         }

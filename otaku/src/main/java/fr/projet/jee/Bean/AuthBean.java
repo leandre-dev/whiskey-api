@@ -91,34 +91,38 @@ public class AuthBean {
         var dbo_user = _userDao.getUserByUName(user.getUsername());
         var isExist = false;
         var errPos = -1;
-        if(dbo_user == null)
+        if(dbo_user == null) {
             errPos = 0;
-
-        try {
-            if(HashPwd(user.getPassword()).equals(dbo_user.getPassword())) {
-                if(tokenVal == null)  {
-                    if(this.addToken(dbo_user))
-                        isExist = true;
-                    else
-                        errPos = 2;
-                }
-                else {
-                    var _token = this.getToken(tokenVal);
-                    if(_token == null)
-                        errPos = 3;
+        }
+        else {
+            try {
+                if(user.getPassword().equals(dbo_user.getPassword())) {
+                    if(tokenVal == null)  {
+                        if(this.addToken(dbo_user))
+                            isExist = true;
+                        else
+                            errPos = 2;
+                    }
                     else {
-                        isExist = true;
-                        if(_token.getEndValidity().compareTo(LocalDateTime.now()) < 0) {
-                            errPos = 4;
-                            _tokenDao.terminate(_token);
+                        var _token = this.getToken(tokenVal);
+                        if(_token == null)
+                            errPos = 3;
+                        else {
+                            isExist = true;
+                            if(_token.getEndValidity().compareTo(LocalDateTime.now()) < 0) {
+                                errPos = 4;
+                                _tokenDao.terminate(_token);
+                                errPos = -1;
+                            }
                         }
                     }
-                }
-            }       
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            errPos = 1;
+                }       
+            } catch (Exception e) {
+                e.printStackTrace();
+                errPos = 1;
+            }
         }
+
         return new CustomLoginPair(isExist, errPos);
     }
 
